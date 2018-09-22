@@ -1,11 +1,9 @@
 package main
 
 type game struct {
-	gameBoard     board
-	nextTurn      rune
-	turns         []turn
-	blackCaptures int
-	whiteCaputres int
+	gameBoard board
+	nextTurn  rune
+	turns     []turn
 }
 
 func (g *game) createBoard() {

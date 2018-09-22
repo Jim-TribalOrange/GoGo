@@ -1,12 +1,13 @@
 package main
 
 type position struct {
-	row, col, pos  int
-	colour         rune
-	surrounding    []position
-	connections    []int
-	ownliabilities []int
-	status         int
+	row, col, pos    int
+	colour           rune
+	surrounding      []position
+	connections      []int
+	ownliabilities   []int
+	oppositionStones []int
+	status           int
 }
 
 func (p *position) getSurrounding(b *board, colour rune) {
@@ -56,7 +57,8 @@ func (p *position) getSurrounding(b *board, colour rune) {
 			p.ownliabilities = append(p.ownliabilities, sp.pos)
 		case 1:
 			p.connections = append(p.connections, sp.pos)
-
+		case 2:
+			p.oppositionStones = append(p.oppositionStones, sp.pos)
 		}
 
 	}
