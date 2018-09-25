@@ -37,12 +37,14 @@ func (b *board) addPiece(p int, c rune) (bool, int) {
 		}
 	}
 
-	po := positionFromInt(p, b.size)
-	po.getSurrounding(b, c)
+	if !isCapture {
+		po := positionFromInt(p, b.size)
+		po.getSurrounding(b, c)
 
-	if !isCapture && len(po.ownliabilities) == 0 {
-		b.moveError = "Suicide"
-		return false, 0
+		if len(po.ownliabilities) == 0 {
+			b.moveError = "Suicide"
+			return false, 0
+		}
 	}
 
 	b.positions[p] = c
@@ -73,6 +75,7 @@ func (b *board) checkCaputres(p int, c rune) (bool, int) {
 		capture = true
 		newCaputres = newCaputres + b.removeGroup(cgroups)
 	}
+
 	b.positions[p] = 0
 	return capture, newCaputres
 
