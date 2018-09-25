@@ -26,18 +26,20 @@ func (b *board) addPiece(p int, c rune) (bool, int) {
 		return false, 0
 	}
 
-	isCapture, newCaptures := b.checkCaputres(p, c)
+	isCapture, newCaptures := b.checkCaptures(p, c)
 
 	if isCapture {
+
+		_, caps := b.capture(newCaptures)
 		switch c {
 		case ('b'):
-			b.blackCaptures += newCaptures
+			b.blackCaptures += caps
 		case ('w'):
-			b.whiteCaputres += newCaptures
-		}
-	}
+			b.whiteCaputres += caps
 
-	if !isCapture {
+		}
+	} else {
+
 		po := positionFromInt(p, b.size)
 		po.getSurrounding(b, c)
 
@@ -48,16 +50,16 @@ func (b *board) addPiece(p int, c rune) (bool, int) {
 	}
 
 	b.positions[p] = c
+
 	return true, 0
 }
 
-func (b *board) checkCaputres(p int, c rune) (bool, int) {
-
+func (b *board) checkCaptures(p int, c rune) (bool, []group) {
 	pos := positionFromInt(p, b.size)
 	b.positions[p] = c
 	pos.getSurrounding(b, c)
 	capture := false
-	newCaputres := 0
+
 	caputredGroups := make([]group, 4)
 	for _, po := range pos.oppositionStones {
 
@@ -65,19 +67,28 @@ func (b *board) checkCaputres(p int, c rune) (bool, int) {
 
 		if len(g.liabilities) == 0 {
 			caputredGroups = append(caputredGroups, g)
+			capture = true
 		}
 	}
 
 	caputredGroups = removeDuplicateGroups(caputredGroups)
 
+	b.positions[p] = 0
+
+	return capture, caputredGroups
+}
+
+func (b *board) capture(caputredGroups []group) (bool, int) {
+
+	newCaptures := 0
+	capture := false
 	for _, cgroups := range caputredGroups {
 
 		capture = true
-		newCaputres = newCaputres + b.removeGroup(cgroups)
+		newCaptures = newCaptures + b.removeGroup(cgroups)
 	}
 
-	b.positions[p] = 0
-	return capture, newCaputres
+	return capture, newCaptures
 
 }
 
