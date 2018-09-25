@@ -52,25 +52,58 @@ func (b *board) addPiece(p int, c rune) (bool, int) {
 func (b *board) checkCaputres(p int, c rune) (bool, int) {
 
 	pos := positionFromInt(p, b.size)
-
+	b.positions[p] = c
 	pos.getSurrounding(b, c)
 	capture := false
 	newCaputres := 0
+	caputredGroups := make([]group, 4)
 	for _, po := range pos.oppositionStones {
 
-		g := b.createGroup(po, notC(c))
+		g := b.getGroup(po, notColour(c))
 
 		if len(g.liabilities) == 0 {
-
-			b.koPosition = p
-			newCaputres = newCaputres + b.removeGroup(g)
-
-			capture = true
+			caputredGroups = append(caputredGroups, g)
 		}
 	}
 
+	caputredGroups = removeDuplicateGroups(caputredGroups)
+
+	for _, cgroups := range caputredGroups {
+
+		capture = true
+		newCaputres = newCaputres + b.removeGroup(cgroups)
+	}
+	b.positions[p] = 0
 	return capture, newCaputres
 
+}
+
+func (b *board) getGroup(p int, colour rune) group {
+
+	//populate the group from the position listed
+	grp := group{positions: make([]int, 4), liabilities: make([]int, 4)}
+
+	grp.positions = append(grp.positions, p)
+	posit := positionFromInt(p, b.size)
+	posit.getSurrounding(b, colour)
+
+	for _, aPos := range posit.connections {
+		grp.positions = append(grp.positions, aPos)
+		grp.getConnectedPosition(aPos, colour, b)
+	}
+
+	for _, pos := range grp.positions {
+
+		po := positionFromInt(pos, b.size)
+
+		for _, lia := range po.ownliabilities {
+			if !grp.liabilityHeld(lia) {
+				grp.liabilities = append(grp.liabilities, lia)
+			}
+		}
+	}
+
+	return grp
 }
 
 func (b *board) removeGroup(g group) int {
@@ -84,16 +117,4 @@ func (b *board) removeGroup(g group) int {
 	}
 
 	return counter
-}
-
-func notC(c rune) rune {
-
-	switch c {
-	case 'b':
-		return 'w'
-	case 'w':
-		return 'b'
-	default:
-		return 0
-	}
 }

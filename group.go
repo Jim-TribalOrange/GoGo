@@ -1,36 +1,11 @@
 package main
 
+import "sort"
+
 type group struct {
 	positions   []int
 	liabilities []int
-}
-
-func (b *board) createGroup(p int, colour rune) group {
-
-	//populate the group from the position listed
-	grp := group{positions: make([]int, 4), liabilities: make([]int, 4)}
-
-	grp.positions = append(grp.positions, p)
-	posit := positionFromInt(p, b.size)
-	posit.getSurrounding(b, colour)
-
-	for _, aPos := range posit.connections {
-		grp.positions = append(grp.positions, aPos)
-		grp.getConnectedPosition(aPos, colour, b)
-	}
-
-	for _, pos := range grp.positions {
-
-		po := positionFromInt(pos, b.size)
-
-		for _, lia := range po.ownliabilities {
-			if !grp.liabilityHeld(lia) {
-				grp.liabilities = append(grp.liabilities, lia)
-			}
-		}
-	}
-
-	return grp
+	caputured   bool
 }
 
 //need to recurse over positionsHeld, getting new positions
@@ -57,6 +32,24 @@ func (g *group) getConnectedPosition(p int, colour rune, b *board) {
 
 	}
 
+	sort.Ints(g.positions)
+
+}
+
+func removeDuplicateGroups(groups []group) []group {
+
+	final := make([]group, len(groups))
+	positions := make([]int, len(groups))
+
+	for _, g := range groups {
+
+		if !contains(positions, g.positions[0]) {
+			positions = append(positions, g.positions[0])
+			final = append(final, g)
+		}
+	}
+
+	return final
 }
 
 func (g *group) positionHeld(p int) bool {

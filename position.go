@@ -95,3 +95,15 @@ func positionFromInt(po int, boardsize int) position {
 	return position{row: x, col: y, pos: po}
 
 }
+
+func notColour(c rune) rune {
+
+	switch c {
+	case 'b':
+		return 'w'
+	case 'w':
+		return 'b'
+	default:
+		return 0
+	}
+}
